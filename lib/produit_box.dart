@@ -1,15 +1,15 @@
-// produit_box.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'produit.dart';
 
 class ProduitBox extends StatelessWidget {
-    final String nomProduit;
+    final Produit produit;
     final bool selProduit;
     final Function(bool?) onChanged;
     final VoidCallback delProduit;
 
     ProduitBox({
-        required this.nomProduit,
+        required this.produit,
         required this.selProduit,
         required this.onChanged,
         required this.delProduit,
@@ -20,7 +20,6 @@ class ProduitBox extends StatelessWidget {
         return Padding(
             padding: EdgeInsets.all(8.0),
             child: Slidable(
-                // Utilisez ActionPane avec DrawerMotion pour la compatibilité
                 endActionPane: ActionPane(
                     motion: const DrawerMotion(),
                     children: [
@@ -40,14 +39,11 @@ class ProduitBox extends StatelessWidget {
                         color: Colors.grey[200],
                     ),
                     child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                            Row(
-                                children: [
-                                    Checkbox(value: selProduit, onChanged: onChanged),
-                                    Text(nomProduit),
-                                ],
-                            ),
+                            Checkbox(value: selProduit, onChanged: onChanged),
+                            Image.network(produit.photo, width: 50, height: 50),
+                            SizedBox(width: 10),
+                            Text(produit.libelle),
                         ],
                     ),
                 ),

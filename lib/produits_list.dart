@@ -1,7 +1,8 @@
-// produits_list.dart
 import 'package:flutter/material.dart';
 import 'produit_box.dart';
 import 'add_produit.dart';
+import 'produit.dart';
+import 'product_details.dart';
 
 class ProduitsList extends StatefulWidget {
     @override
@@ -9,21 +10,28 @@ class ProduitsList extends StatefulWidget {
 }
 
 class _ProduitsListState extends State<ProduitsList> {
-    List<Map<String, dynamic>> produits = [
-        {"nom": "Produit 1", "selected": false},
-        {"nom": "Produit 2", "selected": false},
-        {"nom": "Produit 3", "selected": false}
+    List<Produit> produits = [
+        Produit(libelle: "Produit 1", description: "Description 1", prix: 10.0, photo: "https://via.placeholder.com/150"),
+        Produit(libelle: "Produit 2", description: "Description 2", prix: 20.0, photo: "https://via.placeholder.com/150"),
+        Produit(libelle: "Produit 3", description: "Description 3", prix: 30.0, photo: "https://via.placeholder.com/150"),
     ];
 
     void toggleSelection(int index, bool? isSelected) {
-        setState(() {
-            produits[index]['selected'] = isSelected!;
-        });
-    }
+    setState(() {
+        produits[index] = Produit(
+            libelle: produits[index].libelle,
+            description: produits[index].description,
+            prix: produits[index].prix,
+            photo: produits[index].photo,
+            selected: isSelected ?? false,
+        );
+    });
+}
 
-    void ajouterProduit(String nom) {
+
+    void ajouterProduit(Produit produit) {
         setState(() {
-            produits.add({"nom": nom, "selected": false});
+            produits.add(produit);
         });
     }
 
@@ -35,7 +43,7 @@ class _ProduitsListState extends State<ProduitsList> {
 
     void supprimerProduitsSelectionnes() {
         setState(() {
-            produits.removeWhere((produit) => produit['selected'] == true);
+            produits.removeWhere((produit) => produit.selected == true);
         });
     }
 
@@ -63,11 +71,21 @@ class _ProduitsListState extends State<ProduitsList> {
             body: ListView.builder(
                 itemCount: produits.length,
                 itemBuilder: (context, index) {
-                    return ProduitBox(
-                        nomProduit: produits[index]['nom'],
-                        selProduit: produits[index]['selected'],
-                        onChanged: (bool? isSelected) => toggleSelection(index, isSelected),
-                        delProduit: () => supprimerProduit(index),
+                    return GestureDetector(
+                        onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => ProductDetails(produit: produits[index]),
+                                ),
+                            );
+                        },
+                        child: ProduitBox(
+                            produit: produits[index],
+                            selProduit: produits[index].selected,
+                            onChanged: (bool? isSelected) => toggleSelection(index, isSelected),
+                            delProduit: () => supprimerProduit(index),
+                        ),
                     );
                 },
             ),

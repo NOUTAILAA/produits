@@ -9,4 +9,6 @@ class ProduitDAO {
   Future<List<ProduitsTable>> getProduits() => _db.getAllProduits();
   Future addProduit(ProduitsTable produit) => _db.insertProduit(produit);
   Future deleteProduit(ProduitsTable produit) => _db.deleteProduit(produit);
+Future updateProduit(ProduitsTable produit) => _db.updateProduit(produit);
+
 }

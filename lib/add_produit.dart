@@ -27,16 +27,22 @@ class AddProduit extends StatelessWidget {
         TextButton(onPressed: () => Navigator.pop(context), child: Text("Annuler")),
         TextButton(
           onPressed: () {
-            if (_libelleController.text.isNotEmpty && _prixController.text.isNotEmpty) {
-              onSubmit(Produit(
-                libelle: _libelleController.text,
-                description: _descriptionController.text,
-                prix: double.parse(_prixController.text),
-                photo: _photoController.text,
-              ));
-              Navigator.pop(context);
-            }
-          },
+  print("Libelle: ${_libelleController.text}");
+  print("Prix: ${_prixController.text}");
+  if (_libelleController.text.isNotEmpty && _prixController.text.isNotEmpty) {
+    onSubmit(Produit(
+      libelle: _libelleController.text,
+      description: _descriptionController.text,
+      prix: double.parse(_prixController.text),
+      photo: _photoController.text,
+    ));
+    Navigator.pop(context);
+  } else {
+    print("Erreur : Champs vides");
+  }
+},
+
+
           child: Text("Ajouter"),
         ),
       ],

@@ -4,22 +4,19 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'dart:io';
 
-// Génération automatique
 part 'base.g.dart';
 
-// Définition des tables
 @DataClassName('ProduitsTable')
 class Produits extends Table {
   TextColumn get libelle => text()();
-  TextColumn get description => text()();
+  TextColumn get description => text().nullable()();
   RealColumn get prix => real()();
-  TextColumn get photo => text()();
+  TextColumn get photo => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {libelle};
 }
 
-// Base de données
 @DriftDatabase(tables: [Produits])
 class ProduitsDatabase extends _$ProduitsDatabase {
   ProduitsDatabase() : super(_openConnection());
@@ -29,7 +26,18 @@ class ProduitsDatabase extends _$ProduitsDatabase {
 
   Future<List<ProduitsTable>> getAllProduits() => select(produits).get();
   Future insertProduit(ProduitsTable produit) => into(produits).insert(produit);
-  Future deleteProduit(ProduitsTable produit) => delete(produits).delete(produit);
+  Future deleteProduit(ProduitsTable produit) async {
+    await (delete(produits)..where((tbl) => tbl.libelle.equals(produit.libelle))).go();
+  }
+  Future updateProduit(ProduitsTable produit) async {
+  await (update(produits)..where((tbl) => tbl.libelle.equals(produit.libelle)))
+      .write(ProduitsCompanion(
+        description: Value(produit.description),
+        prix: Value(produit.prix),
+        photo: Value(produit.photo),
+      ));
+}
+
 }
 
 LazyDatabase _openConnection() {

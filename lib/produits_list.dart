@@ -1,94 +1,77 @@
 import 'package:flutter/material.dart';
-import 'produit_box.dart';
-import 'add_produit.dart';
+import 'data/base.dart';
+import 'dao/produit_dao.dart';
 import 'produit.dart';
+import 'add_produit.dart';
 import 'product_details.dart';
 
-class ProduitsList extends StatefulWidget {
-    @override
-    _ProduitsListState createState() => _ProduitsListState();
-}
+class ProduitsList extends StatelessWidget {
+  final ProduitDAO produitDAO;
 
-class _ProduitsListState extends State<ProduitsList> {
-    List<Produit> produits = [
-        Produit(libelle: "Produit 1", description: "Description 1", prix: 10.0, photo: "https://via.placeholder.com/150"),
-        Produit(libelle: "Produit 2", description: "Description 2", prix: 20.0, photo: "https://via.placeholder.com/150"),
-        Produit(libelle: "Produit 3", description: "Description 3", prix: 30.0, photo: "https://via.placeholder.com/150"),
-    ];
+  ProduitsList({required this.produitDAO});
 
-    void toggleSelection(int index, bool? isSelected) {
-    setState(() {
-        produits[index] = Produit(
-            libelle: produits[index].libelle,
-            description: produits[index].description,
-            prix: produits[index].prix,
-            photo: produits[index].photo,
-            selected: isSelected ?? false,
-        );
-    });
-}
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Liste des Produits'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.add),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => AddProduit(onSubmit: (produit) {
+                  produitDAO.addProduit(ProduitsTable(
+                    libelle: produit.libelle,
+                    description: produit.description,
+                    prix: produit.prix,
+                    photo: produit.photo,
+                  ));
+                }),
+              );
+            },
+          ),
+        ],
+      ),
+      body: StreamBuilder<List<ProduitsTable>>(
+        stream: produitDAO.getProduits().asStream(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Erreur : ${snapshot.error}'));
+          } else if (snapshot.hasData) {
+            final produits = snapshot.data!;
+            return ListView.builder(
+              itemCount: produits.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(produits[index].libelle),
+                  onTap: () {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => ProductDetails(
+        produit: Produit(
+          libelle: produits[index].libelle,
+          description: produits[index].description ?? '',
+          prix: produits[index].prix,
+          photo: produits[index].photo ?? '',
+        ),
+      ),
+    ),
+  );
+},
 
-
-    void ajouterProduit(Produit produit) {
-        setState(() {
-            produits.add(produit);
-        });
-    }
-
-    void supprimerProduit(int index) {
-        setState(() {
-            produits.removeAt(index);
-        });
-    }
-
-    void supprimerProduitsSelectionnes() {
-        setState(() {
-            produits.removeWhere((produit) => produit.selected == true);
-        });
-    }
-
-    @override
-    Widget build(BuildContext context) {
-        return Scaffold(
-            appBar: AppBar(
-                title: Text("Liste des Produits"),
-                actions: [
-                    IconButton(
-                        icon: Icon(Icons.add),
-                        onPressed: () {
-                            showDialog(
-                                context: context,
-                                builder: (context) => AddProduit(onSubmit: ajouterProduit),
-                            );
-                        },
-                    ),
-                    IconButton(
-                        icon: Icon(Icons.delete),
-                        onPressed: supprimerProduitsSelectionnes,
-                    ),
-                ],
-            ),
-            body: ListView.builder(
-                itemCount: produits.length,
-                itemBuilder: (context, index) {
-                    return GestureDetector(
-                        onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => ProductDetails(produit: produits[index]),
-                                ),
-                            );
-                        },
-                        child: ProduitBox(
-                            produit: produits[index],
-                            selProduit: produits[index].selected,
-                            onChanged: (bool? isSelected) => toggleSelection(index, isSelected),
-                            delProduit: () => supprimerProduit(index),
-                        ),
-                    );
-                },
-            ),
-        );
-    }
+                );
+              },
+            );
+          } else {
+            return Center(child: Text('Aucun produit trouvé.'));
+          }
+        },
+      ),
+    );
+  }
 }
